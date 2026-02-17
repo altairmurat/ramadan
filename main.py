@@ -8,6 +8,13 @@ from logger import log_user
 from date_time_finder import get_current_time_by_city, get_fajr_time
 from dotenv import load_dotenv
 import os
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/ping")
+async def ping():
+    return {"status": "active"}
 
 load_dotenv()
 
@@ -99,5 +106,6 @@ async def message_handler(event):
             )
             
             
+
 
 client.run_until_disconnected()
