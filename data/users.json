@@ -1,0 +1,14 @@
+{
+    "users": [
+        {
+            "user_id": 822413321,
+            "city": "Daegu",
+            "country": "South Korea"
+        },
+        {
+            "user_id": 5194076289,
+            "city": "Astana",
+            "country": "Kazakhstan"
+        }
+    ]
+}
