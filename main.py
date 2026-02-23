@@ -9,8 +9,16 @@ from date_time_finder import get_current_time_by_city, get_fajr_time
 from dotenv import load_dotenv
 import os
 from fastapi import FastAPI
+from fastapi import APIRouter
+from fastapi.middleware.cors import CORSMiddleware
+import os
 
+router = APIRouter()
 app = FastAPI()
+app.include_router(router)
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
 
 @app.get("/ping")
 async def ping():
@@ -109,3 +117,4 @@ async def message_handler(event):
 
 
 client.run_until_disconnected()
+
