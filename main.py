@@ -8,30 +8,6 @@ from logger import log_user
 from date_time_finder import get_current_time_by_city, get_fajr_time
 from dotenv import load_dotenv
 import os
-from fastapi import FastAPI
-from fastapi import APIRouter
-from fastapi.middleware.cors import CORSMiddleware
-import os
-
-router = APIRouter()
-app = FastAPI()
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.include_router(router)
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
-
-@app.get("/ping")
-async def ping():
-    return {"status": "active"}
 
 load_dotenv()
 
@@ -49,24 +25,6 @@ async def start_handler(event):
     user_id = event.sender_id
     user_states[user_id] = "waiting_for_city"
     await event.respond("Hi, I can schedule Ramadan reminders \nSend me your city.")
-
-@client.on(events.NewMessage(pattern="/launch"))
-async def launch_handler(event):
-    await event.respond("Launching the reminder system...")
-    while True:
-        with open('./data/users.json', 'r') as fr:
-            data = json.load(fr)
-        
-        for user in data["users"]:
-            city = user["city"]
-            country = user["country"]
-            fajr_time = get_fajr_time(city, country)
-            current_time = get_current_time_by_city(city)
-            
-            if current_time.split(" ")[1][:5] == fajr_time:
-                await client.send_message(user["user_id"], "It's time for Fajr prayer! 🌙")
-        
-        time.sleep(60)  # Check every minute
         
 @client.on(events.NewMessage(pattern="/help"))
 async def help_handler(event):
@@ -121,10 +79,35 @@ async def message_handler(event):
             await event.respond(
                 f"Saved ✅\nCity: {user_data[user_id]['city']}\nCountry: {country}"
             )
-            
-            
 
 
-client.run_until_disconnected()
+# Your reminder checker as async task
+async def reminder_checker():
+    while True:
+        with open('./data/users.json', 'r') as fr:
+            data = json.load(fr)
+        
+        for user in data["users"]:
+            city = user["city"]
+            country = user["country"]
+            fajr_time = get_fajr_time(city, country)
+            current_time = get_current_time_by_city(city)
+            
+            if current_time.split(" ")[1][:5] == fajr_time:
+                await client.send_message(user["user_id"], "It's time for Fajr prayer! 🌙")
+        await asyncio.sleep(60)
+
+async def main():
+    await client.start(bot_token=bot_token)
+    print("Bot authenticated → running forever")
+    
+    # Start the periodic Fajr checker in background
+    asyncio.create_task(reminder_checker())
+    
+    # This line keeps the program alive forever
+    await client.run_until_disconnected()
+
+if __name__ == "__main__":
+    asyncio.run(main())
 
 
