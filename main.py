@@ -21,7 +21,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 # Use StringSession if you want to avoid file-based session on ephemeral filesystem
 # Otherwise keep "session_bot" (but Render free may lose the file on restart)
-client = TelegramClient("session_bot", api_id, api_hash).start(bot_token=bot_token)
+client = TelegramClient("session_bot", API_ID, API_HASH).start(bot_token=BOT_TOKEN)
 
 app = FastAPI(title="Ramadan Fajr Reminder Bot")
 
@@ -167,5 +167,6 @@ if __name__ == "__main__":
         log_level="info",
         # workers=1  # keep single worker on free tier
     )
+
 
 
